@@ -36,7 +36,9 @@ The adapter pattern in software engineering helps an object to work together nic
 
 In the case of recycler view we have our apps data which we want to display as a list. We don’t want to change the way our app stores or processes data just to put it onto the screen. So we built an adapter which adapts our data into something that can be used by RecyclerView. 
 
-In our app, we’ll be building an adapter that adapt list for use by RecyclerView. But the adapter is a general pattern we can apply it to anything. No matter how we store our data, if it can be presented in a way that recycler view can use, you can build an adapter to convert it.   #### Adapter Interfaces
+In our app, we’ll be building an adapter that adapt list for use by RecyclerView. But the adapter is a general pattern we can apply it to anything. No matter how we store our data, if it can be presented in a way that recycler view can use, you can build an adapter to convert it. 
+
+#### Adapter Interfaces
 RecyclerView adapters must provide a few methods for RecyclerView to understand how to display the data on screen. 
 
 Things needed for RecyclerView Adapter:
@@ -49,9 +51,11 @@ Things needed for RecyclerView Adapter:
     - RecyclerView’s main interface - ViewHolders know things like the last position the items have in the list, which is important when you are animating list changes. 
 
 ——
+
 ### Add a RecyclerView
 
-1. Add RecyclerView to layout. Open fragment_sleep_tracker.xml and replace the entire ScrollView, including the enclosed TextView, with a RecyclerView: ```
+1. Add RecyclerView to layout. Open fragment_sleep_tracker.xml and replace the entire ScrollView, including the enclosed TextView, with a RecyclerView:
+```
 <androidx.recyclerview.widget.RecyclerView
   android:id="@+id/sleep_list"
   android:layout_width="0dp"
@@ -65,31 +69,37 @@ Things needed for RecyclerView Adapter:
 In SleepNightAdapter.kt
 1. Create a file called SleepNightAdapter.kt
 ```class SleepNightAdapter: RecyclerView.Adapter<TextItemViewHolder>()```
-2. Define a data source. Create variable data and assign it to listOf<SleepNight>.  
-3. Override getItemCount() and have it return data.size.  
-4. Override onBindViewHolder()  The function should retrieve the item from the data list, and set holder.textView.text to item.sleepQuality.toString().  
-5. Override onCreateViewHolder(). NOTE The Adapter requires this method, but we won't fill it in here. We’ll cover it in a later exercise, but for now it just make sure it contains the line, TODO("not implemented"), so the code will compile.  
+2. Define a data source. Create variable data and assign it to listOf<SleepNight>. 
+3. Override getItemCount() and have it return data.size. 
+4. Override onBindViewHolder() -> The function should retrieve the item from the data list, and set holder.textView.text to item.sleepQuality.toString(). 
+5. Override onCreateViewHolder(). -> NOTE The Adapter requires this method, but we won't fill it in here. We’ll cover it in a later exercise, but for now it just make sure it contains the line, TODO("not implemented"), so the code will compile. 
 6. Verify that the code compiles and runs without errors.
-7. Now to tell RecyclerView api how to create a new view holder. - the api for that is called onCreateViewHolder() In SleepNightAdapter, onCreateViewHolder(), inflate the text_item_view layout and return the ViewHolder. ``` override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TextItemViewHolder {
+7. Now to tell RecyclerView api how to create a new view holder. - the api for that is called onCreateViewHolder() In SleepNightAdapter, onCreateViewHolder(), inflate the text_item_view layout and return the ViewHolder.
+    ```override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TextItemViewHolder {
        val layoutInflater = LayoutInflater.from(parent.context)
        val view = layoutInflater
             .inflate(R.layout.text_item_view, parent, false) as TextView
        return TextItemViewHolder(view)
- } ```
-8. In SleepNightAdapter, add a custom setter to data that calls notifyDataSetChanged() and tell Kotlin to save the new value by setting field = value. ``` set(value) {
+ }```
+8. In SleepNightAdapter, add a custom setter to data that calls notifyDataSetChanged() and tell Kotlin to save the new value by setting field = value.
+  ```
+set(value) {
    field = value
    notifyDataSetChanged()
  }
 ```
 
-9. In SleepTrackerFragment, create a new SleepNightAdapter, and use binding to associate it with the RecyclerView: ``` binding.sleepList.adapter = adapter ```
-10. Create an observer on sleepTrackerViewModel.nights that sets the Adapter when there is new data. LiveData observers are sometimes passed null, so make sure you check for null. 
+9. In SleepTrackerFragment, create a new SleepNightAdapter, and use binding to associate it with the RecyclerView:
+    ``` binding.sleepList.adapter = adapter ```
+10. Create an observer on sleepTrackerViewModel.nights that sets the Adapter when there is new data.
+    LiveData observers are sometimes passed null, so make sure you check for null. 
 ——
 
 ### Why ViewHolders are used by RecyclerView?
 
 ```class TextItemViewHolder(val textView: TextView): RecyclerView.ViewHolder(textView)```
 RecyclerView relies upon the functionality above to correct the position the view as the list scrolls and do interesting things like animating views when items get edit or removed in the adapter. Because it has all of this information available in the ViewHolder, RecyclerView can even continue to animate the view while they are moving from scrolling. 
+    
 A ViewHolder tells a RecyclerView where and how an item should get drawn in the list. We can see “itemView” which is the reference that RecyclerView reviews when it needs to access the actual view that’s being displayed. RecyclerView will use itemView when binding an item to display on the screen, when drawing decorations around the view like a border and for accessibility. RecyclerView does not care what kind of view is stored in itemView. You can put anything here like the TextView or even a constraint layout. We can also see some useful methods like getAdapterPosition - that the RecyclerView can use to figure out the position in the list that was bound to a particular ViewHolder. Another important one is getLayoutPosition - which RecyclerView can use to know in what position the ViewHolder was displayed. 
 
 Your ViewHolder can tell RecyclerView what its ID is. and ID is just a unique identifier like night ID on our sleep night. When we override getItemId, RecyclerView can use this ID when performing animations.  
@@ -116,7 +126,8 @@ RecyclerView has a rich API for updating a single element. You can tell Recycler
 - Move 
 - Update : the content has changed.
 
-### DiffUtil RecyclerView has a class called DiffUtil,  which is exactly for calculating diffs of differences between two lists. 
+### DiffUtil
+    RecyclerView has a class called DiffUtil,  which is exactly for calculating diffs of differences between two lists. 
 
 It will take an old list and the new list, and figure out what’s different. It will find items that were added, removed or changed. Then, it will use an algorithm called the Myers diff to figure out the minimum number of changes to make from the old list to produce the new list. That means, instead of adding an item and removing it somewhere else, it will figure out what needs to be done. 
 
@@ -126,7 +137,8 @@ It will take an old list and the new list, and figure out what’s different. It
 - Efficient 
 
 ——
-### Refresh Data with DiffUtil Reference link: https://classroom.udacity.com/courses/ud9012/lessons/ee5a525f-0ba3-4d25-ba29-1fa1d6c567b8/concepts/9a6c1600-1f64-4acb-811a-b5d89649d4a1
+### Refresh Data with DiffUtil
+    Reference link: https://classroom.udacity.com/courses/ud9012/lessons/ee5a525f-0ba3-4d25-ba29-1fa1d6c567b8/concepts/9a6c1600-1f64-4acb-811a-b5d89649d4a1
 
 ### Add DataBinding to the Adapter
 Using data binding to set the views. For that we need to create Binding Adapter.
